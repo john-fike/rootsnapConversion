@@ -1,39 +1,28 @@
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 
+import os
+import glob
 
-print('Loading xml file...')
+#########################################################################################
+#####################convert RSP file to XML#############################################
+#remove jpg binary data, isolate xml metadata containing root annotations and save them to [filename]_clipped
+#########################################################################################
+def convertRSPtoXML(inputFile):
 
-# Reading the data inside the xml
-# file to a variable under the name
-# data
-with open('test.xml', 'r') as f:
-    data = f.read()
- 
-# Passing the stored data inside
-# the beautifulsoup parser, storing
-# the returned object
-Bs_data = BeautifulSoup(data, "xml")
- 
-# Finding all instances of tag
-# `unique`
-b_unique = Bs_data.find_all('date')
- 
-print(b_unique)
- 
-# # Using find() to extract attributes
-# # of the first instance of the tag
-# b_name = Bs_data.find('child', {'name':'Frank'})
- 
-# print(b_name)
- 
-# # Extracting the data stored in a
-# # specific attribute of the
-# # `child` tag
-# value = b_name.get('test')
- 
-# print(value)
+    outputFilepath = ".\\" + inputFile + "_clipped.xml"
+
+    print("Loading RSP file...")
+    with open(inputFile, "r", encoding = "latin-1") as f:
+        data = f.read()
+    
+
+    clippedData = data[data.index('<ProjectXML') : data.index('</ProjectXML')].strip()
 
 
+    with open(outputFilepath, 'w') as oup:
+        oup.write(clippedData)
 
-#use dictionary...
+
+convertRSPtoXML('Barley_101_10Aug2020.rsp')
+
