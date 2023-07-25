@@ -63,11 +63,11 @@ def buildDictionary(roots, scanNum):
             yRoots.append([float(yVal.text) for yVal in yVals])
             xRoots.append([float(xVal.text) for xVal in xVals])
 
-        temp = ""
-        for i in range(xRoots):
-            for j in range(xRoots[i]):
-                temp = temp + str(xRoots[i][j]) + "," + str(yRoots[i][j]) + ";"
-        CVATPoints.append(temp)
+            temp = ""
+            for i in range(len(xRoots)):
+                for j in range(len(xRoots[i])):
+                    temp = temp + str(xRoots[i][j]) + "," + str(yRoots[i][j]) + ";"
+            CVATPoints.append(temp)
 
         return dict(scanID = scanNum, rootXVals = xRoots, rootYVals = yRoots, points = CVATPoints)
     except Exception as e:

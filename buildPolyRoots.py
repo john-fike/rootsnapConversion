@@ -6,7 +6,7 @@ import glob
 # folderPath = './samplePoints.xml'
 
 scanDict = extractRSProots.extractRootCoords('./samplePoints.xml') 
-# print(scanDict)
+print(scanDict)
 # for i in range(len(scanDict[0]["rootXVals"])):
 #     for j in range(len(scanDict[0]["rootXVals"][i])):
 #         print(scanDict[0]["rootYVals"][i][j]) 
