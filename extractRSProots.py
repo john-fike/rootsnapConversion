@@ -53,19 +53,25 @@ def findNestedElements(soup, parent_element_name, child_element_name):
 #----------------------------------------------------------------------------------------
 
 def buildDictionary(roots, scanNum):
-    yRoots = []
-    xRoots = []
-    for root in roots:
-        xVals = root.find_all('Y')
-        yVals = root.find_all('X')
-        yRoots.append([float(yVal.text) for yVal in yVals])
-        xRoots.append([float(xVal.text) for xVal in xVals])
-    return dict(scanID = scanNum, rootXVals = xRoots, rootYVals = yRoots)
+    try:
+        yRoots = []
+        xRoots = []
+        for root in roots:
+            xVals = root.find_all('X')
+            yVals = root.find_all('Y')
+            yRoots.append([float(yVal.text) for yVal in yVals])
+            xRoots.append([float(xVal.text) for xVal in xVals])
+
+        return dict(scanID = scanNum, rootXVals = xRoots, rootYVals = yRoots)
+    except Exception as e:
+        print("An error occured while building coordinate dictionary:", e)
+        return None
 
 #----------------------------------------------------------------------------------------
 
 
 def extractRootCoords(filePath):
+    print("Extracting coordinates from: " + filePath)
     try:
         with open(filePath,'r') as f:
             data = f.read()
@@ -88,9 +94,9 @@ def extractRootCoords(filePath):
                 return [scanDict_0, scanDict_1, scanDict_2, scanDict_3]
     
         else:
-            raise ValueError("Incorrect number of scans in file:" + filePath)
+            raise ValueError("Incorrect number of scans in file: ")
     except Exception as e:
-        print("An error occured while finding a nested element:", e)
+        print("An error occured while extracting root coordinates:", e)
         return None        
 
 
@@ -118,9 +124,9 @@ def extractRootCoords(filePath):
 #     except Exception as e:
 #         print(f"Error while processing {filePath}: {e}")
             
-scanDictionaries = extractRootCoords('./Barley_101_10Aug2020.rsp_clipped.xml')
-with open('./output.txt','w') as oup:
-    for dict in scanDictionaries:
-        for key, value in dict.items():
-            oup.write(f"{key}: {value}\n")
+# scanDictionaries = extractRootCoords('./Barley_101_10Aug2020.rsp_clipped.xml')
+# with open('./output.txt','w') as oup:
+#     for dict in scanDictionaries:
+#         for key, value in dict.items():
+#             oup.write(f"{key}: {value}\n")
 
