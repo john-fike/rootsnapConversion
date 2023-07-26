@@ -5,9 +5,13 @@ import os
 import glob
 
 folderPath = './'
-rspFiles = glob.glob(os.path.join(folderPath, "*.rsp_clipped.xml"))
 
-for filePath in rspFiles:
+rspFiles = glob.glob(os.path.join(folderPath, "*.rsp"))
+
+
+xmlFiles = glob.glob(os.path.join(folderPath, "*.rsp_clipped.xml"))
+
+for filePath in xmlFiles:
     try:
         scanDict = extractRSProots.extractRootCoords(filePath) 
 

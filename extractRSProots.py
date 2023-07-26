@@ -30,7 +30,7 @@ def convertRSPtoXML(filePath):
     except Exception as e:
         print(f"Error while processing {filePath}: {e}")
 #----------------------------------------------------------------------------------------
-def buildDictionary(roots, scanID):
+def buildDictionary(roots, scanID, yOffset):
     try:
         xRoots = []        
         yRoots = []
@@ -44,7 +44,10 @@ def buildDictionary(roots, scanID):
         for i in range(len(xRoots)):
             temp = []
             for j in range(len(xRoots[i])):
-                temp.append(str(xRoots[i][j]) + "," + str(yRoots[i][j]) + ";")
+                if(xRoots[i][j] > 200 and yRoots[i][j] > 200):
+                    temp.append(str(xRoots[i][j-2]) + "," + str(yRoots[i][j-2]-yOffset) + ";")
+                else:
+                    temp.append(str(xRoots[i][j]) + "," + str(yRoots[i][j]-yOffset) + ";")
             CVATPoints.append(temp)
         
 
@@ -73,16 +76,16 @@ def extractRootCoords(filePath):
 
         if len(scans) == 4:        
                 roots = scans[0].find_all('Root')
-                scanDict_0 = buildDictionary(roots,scanID_0)
+                scanDict_0 = buildDictionary(roots,scanID_0, 0)
 
                 roots = scans[1].find_all('Root')
-                scanDict_1 = buildDictionary(roots,scanID_1)
+                scanDict_1 = buildDictionary(roots,scanID_1, -1000)
 
                 roots = scans[2].find_all('Root')
-                scanDict_2 = buildDictionary(roots,scanID_2)
+                scanDict_2 = buildDictionary(roots,scanID_2, -1000)
 
                 roots = scans[3].find_all('Root')
-                scanDict_3 = buildDictionary(roots,scanID_3)
+                scanDict_3 = buildDictionary(roots,scanID_3, -500)
 
                 return [scanDict_0, scanDict_1, scanDict_2, scanDict_3]
     
