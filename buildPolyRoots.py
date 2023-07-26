@@ -21,16 +21,20 @@ with open('./output.txt', 'a') as oup:
 # with open('./testCVATAnnotations.xml', 'a') as oup:
 image = ET.Element("image")
 
+
 for i in range(len(scanDict[0]["points"])):
     # for j in range(len(scanDict[0]["points"][i])):
         # for root in scanDict[0]["points"][i]:
     pointStr = ''.join(scanDict[0]["points"][i])
+    pointStr = pointStr[:-1]
     print(pointStr)
-    polyline = ET.Element("polyline", points = pointStr)
+    polyline = ET.Element("polyline", label = "root", source = "manual", occluded = "0", points = pointStr)
+    polyline.text = "\n"
     image.append(polyline)
 
+
 annotations = ET.ElementTree(image)
-annotations.write('./testCVATAnnotations.xml')
+annotations.write('./testCVATAnnotations.xml', encoding='utf-8', xml_declaration=True)
 
 
 
