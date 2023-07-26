@@ -14,7 +14,9 @@ soup = BeautifulSoup(data, 'xml')
 
 for s in range(len(scanDict)):
     for i in range(len(scanDict[s]["points"])):
-        image = soup.find("image", attrs = {'id':s})#replace 0 with s variable from dict loop
+        print(scanDict[s]["scanID"])
+        image = soup.find("image", attrs = {'name':scanDict[s]["scanID"]})
+        print(image)
         pointStr = ''.join(scanDict[0]["points"][i])
         pointStr = pointStr[:-1]
         polyline = soup.new_tag("polyline", "\n", label = "root", source = "manual", occluded = "0", points = pointStr)

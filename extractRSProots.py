@@ -30,27 +30,6 @@ def convertRSPtoXML(filePath):
     except Exception as e:
         print(f"Error while processing {filePath}: {e}")
 #----------------------------------------------------------------------------------------
-
-#----------------------------------------------------------------------------------------
-#find an element nested in another element
-def findNestedElements(soup, parent_element_name, child_element_name):
-    try:
-        # Find all occurrences of the parent element
-        parent_elements = soup.find_all(parent_element_name)
-
-        # Find all child elements with a different name, nested within each parent element
-        results = []
-        for parent_element in parent_elements:
-            child_elements = parent_element.find_all(child_element_name)
-            if child_elements:
-                results.extend(child_elements)
-
-        return results
-    except Exception as e:
-        print("An error occured while finding a nested element", e)
-        return None
-#----------------------------------------------------------------------------------------
-
 def buildDictionary(roots, scanID):
     try:
         xRoots = []        
@@ -85,18 +64,25 @@ def extractRootCoords(filePath):
         soup = BeautifulSoup(data, 'xml')
         scans = soup.find_all('Scan')
 
+        fileName = 'Barley_101_10Aug2020.rsp_clipped.xml'
+        DIndex = fileName.find("_") + 5
+        scanID_0 = fileName[:DIndex] + "D1_" + fileName[DIndex:-15] + "PNG"
+        scanID_1 = fileName[:DIndex] + "D2_" + fileName[DIndex:-15] + "PNG"
+        scanID_2 = fileName[:DIndex] + "D3_" + fileName[DIndex:-15] + "PNG"
+        scanID_3 = fileName[:DIndex] + "D4_" + fileName[DIndex:-15] + "PNG"
+
         if len(scans) == 4:        
                 roots = scans[0].find_all('Root')
-                scanDict_0 = buildDictionary(roots,0)
+                scanDict_0 = buildDictionary(roots,scanID_0)
 
                 roots = scans[1].find_all('Root')
-                scanDict_1 = buildDictionary(roots,1)
+                scanDict_1 = buildDictionary(roots,scanID_1)
 
                 roots = scans[2].find_all('Root')
-                scanDict_2 = buildDictionary(roots,2)
+                scanDict_2 = buildDictionary(roots,scanID_2)
 
                 roots = scans[3].find_all('Root')
-                scanDict_3 = buildDictionary(roots,3)
+                scanDict_3 = buildDictionary(roots,scanID_3)
 
                 return [scanDict_0, scanDict_1, scanDict_2, scanDict_3]
     

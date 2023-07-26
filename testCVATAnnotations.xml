@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<annotations>
+<version>1.1</version>
+<meta>
+<task>
+<id>238520</id>
+<name>barleyRoots</name>
+<size>4</size>
+<mode>annotation</mode>
+<overlap>0</overlap>
+<bugtracker/>
+<created>2023-07-25 17:31:22.114766+00:00</created>
+<updated>2023-07-25 17:41:08.184999+00:00</updated>
+<subset>default</subset>
+<start_frame>0</start_frame>
+<stop_frame>3</stop_frame>
+<frame_filter/>
+<segments>
+<segment>
+<id>240649</id>
+<start>0</start>
+<stop>3</stop>
+<url>https://app.cvat.ai/api/jobs/240571</url>
+</segment>
+</segments>
+<owner>
+<username>john-fike</username>
+<email>johnfike223@gmail.com</email>
+</owner>
+<assignee/>
+<labels>
+<label>
+<name>root</name>
+<color>#f3838e</color>
+<type>polyline</type>
+<attributes>
+</attributes>
+</label>
+<label>
+<name>tag</name>
+<color>#13f026</color>
+<type>polygon</type>
+<attributes>
+</attributes>
+</label>
+<label>
+<name>nodule</name>
+<color>#00b306</color>
+<type>polygon</type>
+<attributes>
+</attributes>
+</label>
+<label>
+<name>ruler</name>
+<color>#2a7dd1</color>
+<type>polygon</type>
+<attributes>
+</attributes>
+</label>
+</labels>
+</task>
+<dumped>2023-07-25 18:57:22.305542+00:00</dumped>
+</meta>
+<image height="2273" id="0" name="Barley_101_D1_10Aug2020.PNG" width="2550">
+<polyline label="root" occluded="0" points="73.9939041,937.014343;78.5883,932.178162;85.11717,929.51825" source="manual"/><polyline label="root" occluded="0" points="2.65991163,1231.05542;7.737925,1236.37524;12.5741282,1240.96973;17.16852,1244.83862;20.5538635,1249.6748" source="manual"/></image>
+<image height="2273" id="1" name="Barley_101_D2_10Aug2020.PNG" width="2550">
+<polyline label="root" occluded="0" points="73.9939041,937.014343;78.5883,932.178162;85.11717,929.51825" source="manual"/><polyline label="root" occluded="0" points="2.65991163,1231.05542;7.737925,1236.37524;12.5741282,1240.96973;17.16852,1244.83862;20.5538635,1249.6748" source="manual"/></image>
+<image height="2273" id="2" name="Barley_101_D3_10Aug2020.PNG" width="2550">
+<polyline label="root" occluded="0" points="73.9939041,937.014343;78.5883,932.178162;85.11717,929.51825" source="manual"/><polyline label="root" occluded="0" points="2.65991163,1231.05542;7.737925,1236.37524;12.5741282,1240.96973;17.16852,1244.83862;20.5538635,1249.6748" source="manual"/></image>
+<image height="2273" id="3" name="Barley_101_D4_10Aug2020.PNG" width="2550">
+<polyline label="root" occluded="0" points="73.9939041,937.014343;78.5883,932.178162;85.11717,929.51825" source="manual"/><polyline label="root" occluded="0" points="2.65991163,1231.05542;7.737925,1236.37524;12.5741282,1240.96973;17.16852,1244.83862;20.5538635,1249.6748" source="manual"/></image>
+</annotations>
