@@ -62,8 +62,6 @@
     <dumped>2023-07-25 18:57:22.305542+00:00</dumped>
   </meta>
   <image id="0" name="Barley_101_D1_10Aug2020.PNG" width="2550" height="2273">
-    <polyline label="root" source="manual" occluded="0" points="1153.49,977.38;1211.33,974.49;1260.49,983.16;1332.79,991.84;1390.62,1023.65;1480.27,1069.92" z_order="0">
-    </polyline>
   </image>
   <image id="1" name="Barley_101_D2_10Aug2020.PNG" width="2550" height="2273">
   </image>
