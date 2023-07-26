@@ -8,7 +8,6 @@ import glob
 #use this to extract xml from rsp files and build dictionaries with root
 
 
-
 #----------------------------------------------------------------------------------------
 # convert RSP file to XML
 # remove jpg binary data, isolate xml metadata containing root annotations and save them to [filename]_clipped
@@ -54,22 +53,23 @@ def findNestedElements(soup, parent_element_name, child_element_name):
 
 def buildDictionary(roots, scanNum):
     try:
+        xRoots = []        
         yRoots = []
-        xRoots = []
         CVATPoints = []
         for root in roots:
             xVals = root.find_all('X')
             yVals = root.find_all('Y')
+            xRoots.append([float(xVal.text) for xVal in xVals])            
             yRoots.append([float(yVal.text) for yVal in yVals])
-            xRoots.append([float(xVal.text) for xVal in xVals])
 
-            temp = ""
-            for i in range(len(xRoots)):
-                for j in range(len(xRoots[i])):
-                    temp = temp + str(xRoots[i][j]) + "," + str(yRoots[i][j]) + ";"
+        for i in range(len(xRoots)):
+            temp = []
+            for j in range(len(xRoots[i])):
+                temp.append(str(xRoots[i][j]) + "," + str(yRoots[i][j]) + ";")
             CVATPoints.append(temp)
+        
 
-        return dict(scanID = scanNum, rootXVals = xRoots, rootYVals = yRoots, points = CVATPoints)
+        return dict(scanID = scanNum, points = CVATPoints)
     except Exception as e:
         print("An error occured while building coordinate dictionary:", e)
         return None
@@ -105,35 +105,4 @@ def extractRootCoords(filePath):
     except Exception as e:
         print("An error occured while extracting root coordinates:", e)
         return None        
-
-
-# convertRSPtoXML('Barley_101_10Aug2020.rsp')
-
-# folderPath = "./"  # Replace this with the path to your folder containing the .rsp files
-
-# grab all .rsp files in folderPath, convert them to xml (pull all metadata and put it in [filename]_clipped)
-# rspFiles = glob.glob(os.path.join(folderPath, "*.rsp"))
-
-# for filePath in rspFiles:
-#     try:
-        
-#         convertRSPtoXML(filePath)
-#     except Exception as e:
-#         print(f"Error while processing {filePath}: {e}")
-
-# grab all .xml files in folderPath, make 4 dictionaries, 
-# xmlFiles = glob.glob(os.path.join(folderPath, "*.rsp_clipped.xml"))
-
-# for filePath in xmlFiles:
-#     try:
-#         
-#         buildDictionaries(filePath)            
-#     except Exception as e:
-#         print(f"Error while processing {filePath}: {e}")
-            
-# scanDictionaries = extractRootCoords('./Barley_101_10Aug2020.rsp_clipped.xml')
-# with open('./output.txt','w') as oup:
-#     for dict in scanDictionaries:
-#         for key, value in dict.items():
-#             oup.write(f"{key}: {value}\n")
 
