@@ -30,7 +30,7 @@ def convertRSPtoXML(filePath):
     except Exception as e:
         print(f"Error while processing {filePath}: {e}")
 #----------------------------------------------------------------------------------------
-def buildDictionary(roots, scanID, yOffset):
+def buildDictionary(roots, scanID, yOffset, xOffset):
     try:
         xRoots = []        
         yRoots = []
@@ -43,11 +43,13 @@ def buildDictionary(roots, scanID, yOffset):
 
         for i in range(len(xRoots)):
             temp = []
-            for j in range(len(xRoots[i])):
-                if(xRoots[i][j] > 200 and yRoots[i][j] > 200):
-                    temp.append(str(xRoots[i][j-2]) + "," + str(yRoots[i][j-2]-yOffset) + ";")
+            for j in range(0, len(xRoots[i]), 2):
+                if(xRoots[i][j] < 10 or yRoots[i][j] < 10):
+                    temp.append(str(xRoots[i][j-2]-xOffset) + "," + str(yRoots[i][j-2]-yOffset) + ";")
                 else:
-                    temp.append(str(xRoots[i][j]) + "," + str(yRoots[i][j]-yOffset) + ";")
+                    temp.append(str(xRoots[i][j]-xOffset) + "," + str(yRoots[i][j]-yOffset) + ";")
+            if(len(temp)<2):
+                temp.append(temp[0])
             CVATPoints.append(temp)
         
 
@@ -57,6 +59,18 @@ def buildDictionary(roots, scanID, yOffset):
         return None
 
 #----------------------------------------------------------------------------------------
+
+
+def findXOffset(scan):
+    try:
+        offset = (scan.find('ImageOffset').find('X')).text
+        print((scan.find('ImageOffset').find('Y')).text)
+        if offset is None:
+            return 0;
+        else:
+            return float(offset)
+    except Exception as e:
+        print("An error occured while finding image X offset: ", e)
 
 
 def extractRootCoords(filePath):
@@ -76,16 +90,16 @@ def extractRootCoords(filePath):
 
         if len(scans) == 4:        
                 roots = scans[0].find_all('Root')
-                scanDict_0 = buildDictionary(roots,scanID_0, 0)
+                scanDict_0 = buildDictionary(roots,scanID_0, 0, findXOffset(scans[0]))
 
                 roots = scans[1].find_all('Root')
-                scanDict_1 = buildDictionary(roots,scanID_1, -1000)
+                scanDict_1 = buildDictionary(roots,scanID_1, -180, findXOffset(scans[1]))
 
                 roots = scans[2].find_all('Root')
-                scanDict_2 = buildDictionary(roots,scanID_2, -1000)
+                scanDict_2 = buildDictionary(roots,scanID_2, -150, findXOffset(scans[2]))
 
                 roots = scans[3].find_all('Root')
-                scanDict_3 = buildDictionary(roots,scanID_3, -500)
+                scanDict_3 = buildDictionary(roots,scanID_3, -60, findXOffset(scans[3]))
 
                 return [scanDict_0, scanDict_1, scanDict_2, scanDict_3]
     
