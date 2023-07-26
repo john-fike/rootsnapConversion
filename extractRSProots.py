@@ -51,7 +51,7 @@ def findNestedElements(soup, parent_element_name, child_element_name):
         return None
 #----------------------------------------------------------------------------------------
 
-def buildDictionary(roots, scanNum):
+def buildDictionary(roots, scanID):
     try:
         xRoots = []        
         yRoots = []
@@ -69,7 +69,7 @@ def buildDictionary(roots, scanNum):
             CVATPoints.append(temp)
         
 
-        return dict(scanID = scanNum, points = CVATPoints)
+        return dict(scanID = scanID, points = CVATPoints)
     except Exception as e:
         print("An error occured while building coordinate dictionary:", e)
         return None
