@@ -64,12 +64,12 @@ def extractRootCoords(filePath):
         soup = BeautifulSoup(data, 'xml')
         scans = soup.find_all('Scan')
 
-        fileName = 'Barley_101_10Aug2020.rsp_clipped.xml'
+        fileName = f.name
         DIndex = fileName.find("_") + 5
-        scanID_0 = fileName[:DIndex] + "D1_" + fileName[DIndex:-15] + "PNG"
-        scanID_1 = fileName[:DIndex] + "D2_" + fileName[DIndex:-15] + "PNG"
-        scanID_2 = fileName[:DIndex] + "D3_" + fileName[DIndex:-15] + "PNG"
-        scanID_3 = fileName[:DIndex] + "D4_" + fileName[DIndex:-15] + "PNG"
+        scanID_0 = fileName[2:DIndex] + "D1_" + fileName[DIndex:-15] + "PNG"
+        scanID_1 = fileName[2:DIndex] + "D2_" + fileName[DIndex:-15] + "PNG"
+        scanID_2 = fileName[2:DIndex] + "D3_" + fileName[DIndex:-15] + "PNG"
+        scanID_3 = fileName[2:DIndex] + "D4_" + fileName[DIndex:-15] + "PNG"
 
         if len(scans) == 4:        
                 roots = scans[0].find_all('Root')
