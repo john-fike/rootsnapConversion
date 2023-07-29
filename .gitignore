@@ -1,0 +1,4 @@
+# Ignore .xml, .rsp, and .jpg files
+*.xml
+*.rsp
+*.jpg
