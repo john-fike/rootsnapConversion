@@ -43,7 +43,7 @@ def buildDictionary(roots, scanID, yOffset, xOffset):
 
         for i in range(len(xRoots)):
             temp = []
-            for j in range(0, len(xRoots[i]), 2):
+            for j in range(0, len(xRoots[i]), 10):
                 if(xRoots[i][j] < 10 or yRoots[i][j] < 10):
                     temp.append(str(xRoots[i][j-2]-xOffset) + "," + str(yRoots[i][j-2]-yOffset) + ";")
                 else:
@@ -66,7 +66,7 @@ def findXOffset(scan):
         offset = (scan.find('ImageOffset').find('X')).text
         print((scan.find('ImageOffset').find('Y')).text)
         if offset is None:
-            return 0;
+            return 0
         else:
             return float(offset)
     except Exception as e:
@@ -83,10 +83,10 @@ def extractRootCoords(filePath):
 
         fileName = f.name
         DIndex = fileName.find("_") + 5
-        scanID_0 = fileName[2:DIndex] + "D1_" + fileName[DIndex:-15] + "PNG"
-        scanID_1 = fileName[2:DIndex] + "D2_" + fileName[DIndex:-15] + "PNG"
-        scanID_2 = fileName[2:DIndex] + "D3_" + fileName[DIndex:-15] + "PNG"
-        scanID_3 = fileName[2:DIndex] + "D4_" + fileName[DIndex:-15] + "PNG"
+        scanID_0 = fileName[6:DIndex] + "D1_" + fileName[DIndex:-15] + "PNG"
+        scanID_1 = fileName[6:DIndex] + "D2_" + fileName[DIndex:-15] + "PNG"
+        scanID_2 = fileName[6:DIndex] + "D3_" + fileName[DIndex:-15] + "PNG"
+        scanID_3 = fileName[6:DIndex] + "D4_" + fileName[DIndex:-15] + "PNG"
 
         if len(scans) == 4:        
                 roots = scans[0].find_all('Root')
