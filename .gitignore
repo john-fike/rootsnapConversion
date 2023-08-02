@@ -1,4 +1,6 @@
-# Ignore .xml, .rsp, and .jpg files
-*.xml
-*.rsp
-*.jpg
+# Ignore everything
+*
+
+# Allow .py files
+!*.py
+>>>>>>> c9e743c (gitignore)
