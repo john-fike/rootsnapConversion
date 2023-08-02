@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
+from tqdm import tqdm
 
 import os
 import glob
@@ -30,12 +31,12 @@ def convertRSPtoXML(filePath):
     except Exception as e:
         print(f"Error while processing {filePath}: {e}")
 #----------------------------------------------------------------------------------------
-def buildDictionary(roots, scanID, yOffset, xOffset):
+def buildDictionary(roots, scanID, xOffset):
     try:
         xRoots = []        
         yRoots = []
         CVATPoints = []
-        for root in roots:
+        for root in tqdm(roots):
             xVals = root.find_all('X')
             yVals = root.find_all('Y')
             xRoots.append([float(xVal.text) for xVal in xVals])            
@@ -44,13 +45,10 @@ def buildDictionary(roots, scanID, yOffset, xOffset):
         for i in range(len(xRoots)):
             temp = []
             for j in range(0, len(xRoots[i]), 10):
-                if(xRoots[i][j] < 10 or yRoots[i][j] < 10):
-                    temp.append(str(xRoots[i][j-2]-xOffset) + "," + str(yRoots[i][j-2]-yOffset) + ";")
-                else:
-                    temp.append(str(xRoots[i][j]-xOffset) + "," + str(yRoots[i][j]-yOffset) + ";")
-            if(len(temp)<2):
-                temp.append(temp[0])
-            CVATPoints.append(temp)
+                if(xRoots[i][j] > 10 or yRoots[i][j] > 10):
+                    temp.append(str(xRoots[i][j]-xOffset) + "," + str(yRoots[i][j]) + ";")
+            if(len(temp)>2):
+                CVATPoints.append(temp)
         
 
         return dict(scanID = scanID, points = CVATPoints)
@@ -64,7 +62,6 @@ def buildDictionary(roots, scanID, yOffset, xOffset):
 def findXOffset(scan):
     try:
         offset = (scan.find('ImageOffset').find('X')).text
-        print((scan.find('ImageOffset').find('Y')).text)
         if offset is None:
             return 0
         else:
@@ -74,7 +71,7 @@ def findXOffset(scan):
 
 
 def extractRootCoords(filePath):
-    print("Extracting coordinates from: " + filePath)
+    # print("Extracting coordinates from: " + filePath)
     try:
         with open(filePath,'r') as f:
             data = f.read()
@@ -90,16 +87,16 @@ def extractRootCoords(filePath):
 
         if len(scans) == 4:        
                 roots = scans[0].find_all('Root')
-                scanDict_0 = buildDictionary(roots,scanID_0, 0, findXOffset(scans[0]))
+                scanDict_0 = buildDictionary(roots,scanID_0, findXOffset(scans[0]))
 
                 roots = scans[1].find_all('Root')
-                scanDict_1 = buildDictionary(roots,scanID_1, -180, findXOffset(scans[1]))
+                scanDict_1 = buildDictionary(roots,scanID_1, findXOffset(scans[1]))
 
                 roots = scans[2].find_all('Root')
-                scanDict_2 = buildDictionary(roots,scanID_2, -150, findXOffset(scans[2]))
+                scanDict_2 = buildDictionary(roots,scanID_2, findXOffset(scans[2]))
 
                 roots = scans[3].find_all('Root')
-                scanDict_3 = buildDictionary(roots,scanID_3, -60, findXOffset(scans[3]))
+                scanDict_3 = buildDictionary(roots,scanID_3, findXOffset(scans[3]))
 
                 return [scanDict_0, scanDict_1, scanDict_2, scanDict_3]
     

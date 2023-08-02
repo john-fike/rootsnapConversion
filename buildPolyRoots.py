@@ -1,3 +1,4 @@
+from tqdm import tqdm
 import extractRSProots
 from bs4 import BeautifulSoup
 
@@ -17,8 +18,8 @@ folderPath = './rsp/'
 xmlFiles = glob.glob(os.path.join(folderPath, "*.rsp_clipped.xml"))
 missingImageCounter = 0
 missingImageList = []
-for filePath in xmlFiles:
-    print("Inserting polylines...")
+for filePath in tqdm(xmlFiles):
+    # print("Inserting polylines...")
     try:
         scanDict = extractRSProots.extractRootCoords(filePath) 
         with open('annotations.xml','r') as f:
@@ -30,7 +31,7 @@ for filePath in xmlFiles:
                 image = soup.find("image", attrs = {'name':scanDict[s]["scanID"]})
                 pointStr = ''.join(scanDict[s]["points"][i])
                 pointStr = pointStr[:-1]
-                polyline = soup.new_tag("polylines", "", label = "root", source = "manual", occluded = "0", points = pointStr)
+                polyline = soup.new_tag("points", "", label = "root", source = "manual", occluded = "0", points = pointStr)
                 image.append(polyline)
         with open('./annotations.xml', 'w') as f:
             f.write(str(soup))
