@@ -1,57 +1,32 @@
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
-from tqdm import tqdm
 
-import os
-import glob
-
-##########################################################################################
-#use this to extract xml from rsp files and build dictionaries with root
-
-
-#----------------------------------------------------------------------------------------
-# convert RSP file to XML
-# remove jpg binary data, isolate xml metadata containing root annotations and save them to [filename]_clipped
-def convertRSPtoXML(filePath):
-    print("Extracting metadata for " + filePath)
-    try:
-        outputFilepath = ".\\" + filePath + "_clipped.xml"
-
-        print("Loading RSP file...")
-        with open(filePath, "r", encoding = "latin-1") as f:
-            data = f.read()
-        
-        #extract metadata
-        clippedData = data[data.index('<ProjectXML') : data.index('</ProjectXML')].strip()
-
-        soup = BeautifulSoup(clippedData, 'xml')
-
-        with open(outputFilepath, 'w') as oup:
-            oup.write(clippedData)
-    except Exception as e:
-        print(f"Error while processing {filePath}: {e}")
 #----------------------------------------------------------------------------------------
 def buildDictionary(roots, scanID, xOffset):
     try:
         xRoots = []        
         yRoots = []
         CVATPoints = []
-        for root in tqdm(roots):
+        YOLOPoints = []
+        for root in roots:
             xVals = root.find_all('X')
             yVals = root.find_all('Y')
             xRoots.append([float(xVal.text) for xVal in xVals])            
             yRoots.append([float(yVal.text) for yVal in yVals])
 
         for i in range(len(xRoots)):
-            temp = []
+            tempCVAT = []
+            tempYOLO =[]
             for j in range(0, len(xRoots[i]), 10):
-                if(xRoots[i][j] > 10 or yRoots[i][j] > 10):
-                    temp.append(str(xRoots[i][j]-xOffset) + "," + str(yRoots[i][j]) + ";")
-            if(len(temp)>2):
-                CVATPoints.append(temp)
+                if(xRoots[i][j]-xOffset > 10 or yRoots[i][j] > 10):
+                    tempCVAT.append(str(xRoots[i][j]-xOffset) + "," + str(yRoots[i][j]) + ";")
+                    tempYOLO.append(str(xRoots[i][j]-xOffset) + " " + str(yRoots[i][j]) + " ")
+            if(len(tempCVAT)>5):
+                CVATPoints.append(tempCVAT)
+                YOLOPoints.append(tempYOLO)
         
 
-        return dict(scanID = scanID, points = CVATPoints)
+        return dict(scanID = scanID, points = CVATPoints, yoloPoints = YOLOPoints)
     except Exception as e:
         print("An error occured while building coordinate dictionary:", e)
         return None
@@ -69,7 +44,9 @@ def findXOffset(scan):
     except Exception as e:
         print("An error occured while finding image X offset: ", e)
 
-
+#returns a list of 4 dictionaries, each containing the scan name (ex. Barley_316_D4_12August2020.PNG) 
+#and a 2D array of points, where each row is a root 
+#points are delimited by ',' and pairs by ';'
 def extractRootCoords(filePath):
     # print("Extracting coordinates from: " + filePath)
     try:
@@ -85,6 +62,9 @@ def extractRootCoords(filePath):
         scanID_2 = fileName[6:DIndex] + "D3_" + fileName[DIndex:-15] + "PNG"
         scanID_3 = fileName[6:DIndex] + "D4_" + fileName[DIndex:-15] + "PNG"
 
+        #if more than 4 scans are detected in the XML data, nothing happens. 
+        #you will have to go through and manually eradicate the extra data
+        #tip: the raw rsp data has everything it contains listed at the bottom of the file
         if len(scans) == 4:        
                 roots = scans[0].find_all('Root')
                 scanDict_0 = buildDictionary(roots,scanID_0, findXOffset(scans[0]))

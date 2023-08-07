@@ -59,7 +59,7 @@ def extract_pngs_from_text_file(file_path):
                         with open(imageName, 'wb') as image_file:
                             image_file.write(image)  
                         if(saveCount > 4):
-                            print("The rsp containing image: " + imageName + " is weird and you should probably check it")
+                            print("   The rsp containing image: " + imageName + " is weird and you should probably check it")
                     except Exception as e:
                         print("There was an error saving scan: " + imageName)
 
@@ -103,7 +103,3 @@ for filepath in tqdm(xmlFiles):
     allImageSizes.append(imsz[1])
 
 displaySizeGraph(savedImageSizes, allImageSizes)
-
-
-
-
