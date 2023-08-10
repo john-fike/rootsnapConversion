@@ -1,17 +1,40 @@
-import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
+from PIL import Image
+
+# https://docs.ultralytics.com/datasets/detect/
+def buildBox(roots, scanID, xOffset, imgSize):
+    try:
+        xTemp = yTemp = width = height = avgY = avgX = []
+
+        for root in roots:
+            xVals = root.find_all('X')  
+            yVals = root.find_all('Y')
+            xTemp.append([float(xVal.text) for xVal in xVals])
+            yTemp.append([float(yVal.text) for yVal in yVals])
+
+            width.append(max(xTemp) - min(xTemp))
+            height.append(max(yTemp) - min(yTemp))
+            avgX.append(sum(xTemp) / len(xTemp))
+            avgY.append(sum(yTemp) / len(yTemp))
+
+        return dict(scanID = scanID, x = avgX, y = avgY, w = width, h = height)
+        
+    except Exception as e:
+        print("An error occured while building bounding boxes: " + e)
+
 
 #----------------------------------------------------------------------------------------
-def buildDictionary(roots, scanID, xOffset):
+def buildDictionary(roots, scanID, xOffset, imgSize):
     try:
         xRoots = []        
         yRoots = []
         CVATPoints = []
         YOLOPoints = []
+
         for root in roots:
-            xVals = root.find_all('X')
+            xVals = root.find_all('X')  
             yVals = root.find_all('Y')
-            xRoots.append([float(xVal.text) for xVal in xVals])            
+            xRoots.append([float(xVal.text) for xVal in xVals])
             yRoots.append([float(yVal.text) for yVal in yVals])
 
         for i in range(len(xRoots)):
@@ -20,7 +43,7 @@ def buildDictionary(roots, scanID, xOffset):
             for j in range(0, len(xRoots[i]), 10):
                 if(xRoots[i][j]-xOffset > 10 or yRoots[i][j] > 10):
                     tempCVAT.append(str(xRoots[i][j]-xOffset) + "," + str(yRoots[i][j]) + ";")
-                    tempYOLO.append(str(xRoots[i][j]-xOffset) + " " + str(yRoots[i][j]) + " ")
+                    tempYOLO.append(str((xRoots[i][j]-xOffset) / imgSize[0]) + " " + str((yRoots[i][j]) / imgSize[1]) + " ")
             if(len(tempCVAT)>5):
                 CVATPoints.append(tempCVAT)
                 YOLOPoints.append(tempYOLO)
@@ -31,9 +54,17 @@ def buildDictionary(roots, scanID, xOffset):
         print("An error occured while building coordinate dictionary:", e)
         return None
 
+
+def getImgSize(imgPath):
+    try:
+        with Image.open(imgPath) as img:
+            width, height = img.size
+            return width, height
+    except IOError as e:
+        print(f"Error opening the image: {e}")
+        return None
+
 #----------------------------------------------------------------------------------------
-
-
 def findXOffset(scan):
     try:
         offset = (scan.find('ImageOffset').find('X')).text
@@ -62,21 +93,26 @@ def extractRootCoords(filePath):
         scanID_2 = fileName[6:DIndex] + "D3_" + fileName[DIndex:-15] + "PNG"
         scanID_3 = fileName[6:DIndex] + "D4_" + fileName[DIndex:-15] + "PNG"
 
+        imageFolderPath = './gimpRepair/BarleyAdjustedImages/'
+
+
         #if more than 4 scans are detected in the XML data, nothing happens. 
         #you will have to go through and manually eradicate the extra data
         #tip: the raw rsp data has everything it contains listed at the bottom of the file
-        if len(scans) == 4:        
+        if len(scans) == 4:      
+
+
                 roots = scans[0].find_all('Root')
-                scanDict_0 = buildDictionary(roots,scanID_0, findXOffset(scans[0]))
+                scanDict_0 = buildDictionary(roots, scanID_0, findXOffset(scans[0]), getImgSize(imageFolderPath + scanID_0))
 
                 roots = scans[1].find_all('Root')
-                scanDict_1 = buildDictionary(roots,scanID_1, findXOffset(scans[1]))
+                scanDict_1 = buildDictionary(roots, scanID_1, findXOffset(scans[1]), getImgSize(imageFolderPath + scanID_1))
 
                 roots = scans[2].find_all('Root')
-                scanDict_2 = buildDictionary(roots,scanID_2, findXOffset(scans[2]))
+                scanDict_2 = buildDictionary(roots, scanID_2, findXOffset(scans[2]), getImgSize(imageFolderPath + scanID_2))
 
                 roots = scans[3].find_all('Root')
-                scanDict_3 = buildDictionary(roots,scanID_3, findXOffset(scans[3]))
+                scanDict_3 = buildDictionary(roots, scanID_3, findXOffset(scans[3]), getImgSize(imageFolderPath + scanID_3))
 
                 return [scanDict_0, scanDict_1, scanDict_2, scanDict_3]
     
