@@ -1,26 +1,6 @@
 from bs4 import BeautifulSoup
 from PIL import Image
 
-# https://docs.ultralytics.com/datasets/detect/
-def buildBox(roots, scanID, xOffset, imgSize):
-    try:
-        xTemp = yTemp = width = height = avgY = avgX = []
-
-        for root in roots:
-            xVals = root.find_all('X')  
-            yVals = root.find_all('Y')
-            xTemp.append([float(xVal.text) for xVal in xVals])
-            yTemp.append([float(yVal.text) for yVal in yVals])
-
-            width.append(max(xTemp) - min(xTemp))
-            height.append(max(yTemp) - min(yTemp))
-            avgX.append(sum(xTemp) / len(xTemp))
-            avgY.append(sum(yTemp) / len(yTemp))
-
-        return dict(scanID = scanID, x = avgX, y = avgY, w = width, h = height)
-        
-    except Exception as e:
-        print("An error occured while building bounding boxes: " + e)
 
 
 #----------------------------------------------------------------------------------------
@@ -44,7 +24,7 @@ def buildDictionary(roots, scanID, xOffset, imgSize):
                 if(xRoots[i][j]-xOffset > 10 or yRoots[i][j] > 10):
                     tempCVAT.append(str(xRoots[i][j]-xOffset) + "," + str(yRoots[i][j]) + ";")
                     tempYOLO.append(str((xRoots[i][j]-xOffset) / imgSize[0]) + " " + str((yRoots[i][j]) / imgSize[1]) + " ")
-            if(len(tempCVAT)>5):
+            if(len(tempCVAT)>3):
                 CVATPoints.append(tempCVAT)
                 YOLOPoints.append(tempYOLO)
         
@@ -55,31 +35,11 @@ def buildDictionary(roots, scanID, xOffset, imgSize):
         return None
 
 
-def getImgSize(imgPath):
-    try:
-        with Image.open(imgPath) as img:
-            width, height = img.size
-            return width, height
-    except IOError as e:
-        print(f"Error opening the image: {e}")
-        return None
-
-#----------------------------------------------------------------------------------------
-def findXOffset(scan):
-    try:
-        offset = (scan.find('ImageOffset').find('X')).text
-        if offset is None:
-            return 0
-        else:
-            return float(offset)
-    except Exception as e:
-        print("An error occured while finding image X offset: ", e)
 
 #returns a list of 4 dictionaries, each containing the scan name (ex. Barley_316_D4_12August2020.PNG) 
 #and a 2D array of points, where each row is a root 
 #points are delimited by ',' and pairs by ';'
 def extractRootCoords(filePath):
-    # print("Extracting coordinates from: " + filePath)
     try:
         with open(filePath,'r') as f:
             data = f.read()
@@ -94,7 +54,6 @@ def extractRootCoords(filePath):
         scanID_3 = fileName[6:DIndex] + "D4_" + fileName[DIndex:-15] + "PNG"
 
         imageFolderPath = './gimpRepair/BarleyAdjustedImages/'
-
 
         #if more than 4 scans are detected in the XML data, nothing happens. 
         #you will have to go through and manually eradicate the extra data
@@ -122,3 +81,22 @@ def extractRootCoords(filePath):
         print("An error occured while extracting root coordinates:", e)
         return None        
 
+def getImgSize(imgPath):
+    try:
+        with Image.open(imgPath) as img:
+            width, height = img.size
+            return width, height
+    except IOError as e:
+        print(f"Error opening the image: {e}")
+        return None
+
+#----------------------------------------------------------------------------------------
+def findXOffset(scan):
+    try:
+        offset = (scan.find('ImageOffset').find('X')).text
+        if offset is None:
+            return 0
+        else:
+            return float(offset)
+    except Exception as e:
+        print("An error occured while finding image X offset: ", e)
