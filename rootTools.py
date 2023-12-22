@@ -1,6 +1,12 @@
+
+from tqdm import tqdm
+import extractRSPAnnotations
 from bs4 import BeautifulSoup
+import os
+import glob
+from PIL import Image, ImageDraw
+from ultralytics import SAM
 from PIL import Image
-import cv2
 
 #recusivley go through all root elements and extract roots, then subroots, then subroots of subroots... etc
 def extractRootSubroots(node, target_name, depth):
@@ -27,9 +33,9 @@ def buildDictionary(roots, scanID, xOffset, imgSize):
             xRoots.append(extractRootSubroots(root, 'X', 0))
             yRoots.append(extractRootSubroots(root, 'Y', 0))
             subRoots = root.findAll('SubRoot')
-            # for subRoot in subRoots:
-            #     xRoots.append(extractRootSubroots(subRoot, 'X', 0))
-            #     yRoots.append(extractRootSubroots(subRoot, 'Y', 0))
+            for subRoot in subRoots:
+                xRoots.append(extractRootSubroots(subRoot, 'X', 0))
+                yRoots.append(extractRootSubroots(subRoot, 'Y', 0))
         #xRoots[i] and yRoots[i] contain the points for each root
 
         CVATPoints = []
@@ -67,7 +73,6 @@ def buildDictionary(roots, scanID, xOffset, imgSize):
             # if(YOLO_box_width > 0.01 and YOLO_box_height > 0.01 and YOLO_box_width < 0.5 and YOLO_box_height < 0.5):       
             YOLOBoxes.append("0 " + str(YOLO_box_x) + " " + str(YOLO_box_y) + " " + str(YOLO_box_width) + " " + str(YOLO_box_height))
             # print("0 " + str(YOLO_box_x) + " " + str(YOLO_box_y) + " " + str(YOLO_box_width) + " " + str(YOLO_box_height))
-            YOLOPoints.append(tempYOLO)
  
         return dict(scanID = scanID, points = CVATPoints, yoloPoints = YOLOPoints, yoloBoxes = YOLOBoxes)
     except Exception as e:
@@ -120,6 +125,7 @@ def extractRootCoords(filePath):
         return None        
 
 
+
 #returns height and width of image
 def getImgSize(imgPath):
     try:
@@ -142,18 +148,60 @@ def findXOffset(scan):
     except Exception as e:
         print("An error occured while finding image X offset: ", e)
 
+##path to file containing rsp. extracted xml will be put here as well
+folderPath = './rsp/'
 
-def show_predictions(image_path, prediction_path):
-    #open image
-    img = cv2.imread(image_path)
-    #open prediction file
-    with open(prediction_path, 'r') as f:
-        data = f.read()
-        #split data into lines
-        lines = data.splitlines()
-        for i in range(len(lines), 2):
-            elements = lines[i].split()
-            x = float(elements[i])
-            y = float(elements[i+1])
-            #plot point 
-            cv2.circle(img, (x, y), 2, (0, 0, 255), 2)
+def buildCVATAnnotations(folderPath):
+    xmlFiles = glob.glob(os.path.join(folderPath, "*.rsp_clipped.xml"))
+    
+    foundImageCounter = 0
+    foundImageList = []
+
+    missingImageCounter = 0
+    missingImageList = []
+
+    missing = 0
+    
+    for filePath in tqdm(xmlFiles):
+        try:
+            scanDict = extractRSPAnnotations.extractRootCoords(filePath) 
+            with open('annotations.xml','r') as f:
+                data = f.read()
+            soup = BeautifulSoup(data, 'xml')
+
+            for s in range(len(scanDict)):
+                for i in range(len(scanDict[s]["points"])):
+                    image = soup.find("image", attrs = {'name':scanDict[s]["scanID"]})
+                    pointStr = ''.join(scanDict[s]["points"][i])
+                    pointStr = pointStr[:-1]
+                    polyline = soup.new_tag("polyline", "", label = "root", source = "manual", occluded = "0", points = pointStr)
+                    image.append(polyline)
+            with open('./annotations.xml', 'w') as f:
+                f.write(str(soup))
+        except AttributeError as nf:
+            print(" WARNING: could not find scan:" + scanDict[s]["scanID"])
+        except Exception as e:
+            print("An error occured while writing to CVAT annotation file:", e)
+
+
+#this function builds box annotations for YOLOv8
+def buildYOLOAnnotations(folderPath):
+    print('Building YOLOv8 Segmentation Annotations')
+
+    #get all xml files in folder 
+    xmlFiles = glob.glob(os.path.join(folderPath, "*.rsp_clipped.xml"))
+    for filePath in tqdm(xmlFiles):
+        try:
+            scanDict = extractRSPAnnotations.extractRootCoords(filePath) 
+            for s in range(len(scanDict)):
+                annotationOutputPath = './test/' + scanDict[s]["scanID"][:-4] + '.txt'
+                with open(annotationOutputPath, 'w+') as f:
+                    # print the size of the yoloboxes list in dictonary scanDict[s]
+                    print(len(scanDict[s]["yoloBoxes"]))
+                    for i in range(len(scanDict[s]["yoloBoxes"])):                    
+                            temp = ''.join(scanDict[s]["yoloBoxes"][i])
+                            f.write(temp + '\n')            
+               
+        except Exception as e:
+            print("An error occured while writing to YOLOv8 annotation file:", e)
+

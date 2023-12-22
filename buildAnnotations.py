@@ -3,7 +3,10 @@ import extractRSPAnnotations
 from bs4 import BeautifulSoup
 import os
 import glob
-
+import cv2
+import time
+from PIL import Image, ImageDraw
+from ultralytics import SAM
 ##path to file containing rsp. extracted xml will be put here as well
 folderPath = './rsp/'
 
@@ -21,7 +24,6 @@ def buildCVATAnnotations(folderPath):
     for filePath in tqdm(xmlFiles):
         try:
             scanDict = extractRSPAnnotations.extractRootCoords(filePath) 
-            print(filePath)
             with open('annotations.xml','r') as f:
                 data = f.read()
             soup = BeautifulSoup(data, 'xml')
@@ -29,53 +31,41 @@ def buildCVATAnnotations(folderPath):
             for s in range(len(scanDict)):
                 for i in range(len(scanDict[s]["points"])):
                     image = soup.find("image", attrs = {'name':scanDict[s]["scanID"]})
-                    pointStr = ''.join(scanDict[s]["boxes"][i])
+                    pointStr = ''.join(scanDict[s]["points"][i])
                     pointStr = pointStr[:-1]
                     polyline = soup.new_tag("polyline", "", label = "root", source = "manual", occluded = "0", points = pointStr)
-                    try:
-                        image.append(polyline)
-                    except AttributeError as e:
-                        missing = 1
-                        pass
-            if(missing == 1):
-                print("WARNING: Could not find image: " + scanDict[s]["scanID"])
-                missing = 0
-                missingImageCounter += 1
-                missingImageList.append(f.name)
-            else:
-                foundImageCounter += 1
-                foundImageList.append(f.name)
+                    image.append(polyline)
             with open('./annotations.xml', 'w') as f:
                 f.write(str(soup))
+        except AttributeError as nf:
+            print(" WARNING: could not find scan:" + scanDict[s]["scanID"])
         except Exception as e:
             print("An error occured while writing to CVAT annotation file:", e)
 
-    with open('./report.txt', 'w') as rep:
-        rep.write("MISSING: \n")
-        for miss in missingImageList:
-            rep.write(miss)
-        rep.write("FOUND: \n")
-        for found in foundImageList:
-            rep.write(found)
 
+#this function builds box annotations for YOLOv8
 def buildYOLOAnnotations(folderPath):
     print('Building YOLOv8 Segmentation Annotations')
 
+    #get all xml files in folder 
     xmlFiles = glob.glob(os.path.join(folderPath, "*.rsp_clipped.xml"))
     for filePath in tqdm(xmlFiles):
         try:
             scanDict = extractRSPAnnotations.extractRootCoords(filePath) 
             for s in range(len(scanDict)):
                 annotationOutputPath = './test/' + scanDict[s]["scanID"][:-4] + '.txt'
-                with open(annotationOutputPath, 'w') as f:
-                    f.truncate(0)
-                with open(annotationOutputPath, 'a') as f:
-                    for i in range(len(scanDict[s]["points"])):                    
+                with open(annotationOutputPath, 'w+') as f:
+                    # print the size of the yoloboxes list in dictonary scanDict[s]
+                    # print(len(scanDict[s]["YOLOPoints2"]))
+                    for i in range(len(scanDict[s]["yoloPoints"])):                    
                             temp = ''.join(scanDict[s]["yoloPoints"][i])
-                            f.write('0 ' + temp + '\n')                    
+                            f.write(temp + '\n')            
                
         except Exception as e:
             print("An error occured while writing to YOLOv8 annotation file:", e)
 
-# buildYOLOAnnotations('./rsp')
-buildCVATAnnotations('./rsp')
+
+
+
+buildYOLOAnnotations('./rsp')
+# buildCVATAnnotations('./rsp')
